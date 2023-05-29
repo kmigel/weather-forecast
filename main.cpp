@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
     CURLcode res;
     
     string city;
-    if(argc != 1) {
+    if(argc != 1 && string(argv[1])[0] != '-') {
         city = argv[1];
     }
     else {
@@ -51,13 +51,19 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        bool remember = false;
-        for(int i = 2; i < argc; i++) {
+        bool remember = false, celsius = true;
+        for(int i = 1; i < argc; i++) {
             if(string(argv[i]) == "-r") remember = true;
+            else if(string(argv[i]) == "-f") celsius = false;
         }
 
         int ind = 7;
-        while(response_string[ind - 8] != 't' || response_string[ind - 7] != 'e' || response_string[ind - 6] != 'm' || response_string[ind - 5] != 'p' || response_string[ind - 4] != '_' || response_string[ind - 3] != 'c') ind++;
+        if(celsius) {
+            while(response_string[ind - 8] != 't' || response_string[ind - 7] != 'e' || response_string[ind - 6] != 'm' || response_string[ind - 5] != 'p' || response_string[ind - 4] != '_' || response_string[ind - 3] != 'c') ind++;
+        }
+        else {
+            while(response_string[ind - 8] != 't' || response_string[ind - 7] != 'e' || response_string[ind - 6] != 'm' || response_string[ind - 5] != 'p' || response_string[ind - 4] != '_' || response_string[ind - 3] != 'f') ind++;
+        }
         string temp = "";
         while(response_string[ind] != ',') {
             temp += response_string[ind];
@@ -67,7 +73,12 @@ int main(int argc, char* argv[]) {
         if(remember) {
             system(("echo " + city + " > city.txt").c_str());
         }
-        cout << "It is currently " << temp << " °C in " << city << '\n';
+        if(celsius) {
+            cout << "It is currently " << temp << " °C in " << city << '\n';
+        }
+        else {
+            cout << "It is currently " << temp << " °F in " << city << '\n';
+        }
         curl_easy_cleanup(curl);
         curl_slist_free_all(headers);
     }
